@@ -3,12 +3,7 @@ package java_video_stream;
 import com.github.sarxos.webcam.Webcam;
 import com.sun.jna.Native;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -16,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import javax.imageio.ImageIO;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 
 import com.sun.jna.NativeLibrary;
@@ -48,6 +44,9 @@ public class JavaServer {
 	 */
 	public static InetAddress[] inet;
 	public static int[] port;
+
+	public static InetAddress[] audinet;
+	public static int[] audport;
 	public static int i;
 	static int count = 0;
 	public static BufferedReader[] inFromClient;
@@ -77,6 +76,10 @@ public class JavaServer {
 		JavaServer.inet = new InetAddress[30];
 		port = new int[30];
 
+		JavaServer.audinet = new InetAddress[30];
+		audport = new int[30];
+
+
 		// TODO code application logic here
 
 		ServerSocket welcomeSocket = new ServerSocket(6782);
@@ -86,10 +89,13 @@ public class JavaServer {
 		outToClient = new DataOutputStream[30];
 
 		DatagramSocket serv = new DatagramSocket(4321);
+		DatagramSocket servaud=new DatagramSocket(54321);
 
 		byte[] buf = new byte[62000];
+		byte[] bufaud = new byte[62000];
 		// Socket[] sc = new Socket[5];
 		DatagramPacket dp = new DatagramPacket(buf, buf.length);
+		DatagramPacket dpaud = new DatagramPacket(buf, buf.length);
 
 		Canvas_Demo canv = new Canvas_Demo();
 		System.out.println("Gotcha");
@@ -105,16 +111,26 @@ public class JavaServer {
 
 			System.out.println(serv.getPort());
 			serv.receive(dp);
+			servaud.receive(dpaud);
 			System.out.println(new String(dp.getData()));
+			System.out.println(new String(dpaud.getData()));
 			buf = "starts".getBytes();
+			bufaud = "startsaud".getBytes();
 
 			inet[i] = dp.getAddress();
 			port[i] = dp.getPort();
 
+			audinet[i] = dpaud.getAddress();
+			audport[i] = dpaud.getPort();
+
 			DatagramPacket dsend = new DatagramPacket(buf, buf.length, inet[i], port[i]);
 			serv.send(dsend);
 
+			DatagramPacket dsendaud = new DatagramPacket(bufaud, bufaud.length, audinet[i], audport[i]);
+			servaud.send(dsendaud);
+
 			Vidthread sendvid = new Vidthread(serv);
+			Audthread sendaud = new Audthread(servaud);
 
 			System.out.println("waiting\n ");
 			connectionSocket[i] = welcomeSocket.accept();
@@ -137,6 +153,7 @@ public class JavaServer {
 
 			System.out.println(inet[i]);
 			sendvid.start();
+			sendaud.start();
 
 			i++;
 
@@ -225,6 +242,81 @@ class Vidthread extends Thread {
 			} catch (Exception e) {
 
 			}
+		}
+
+	}
+
+}
+//AudThread
+
+class Audthread extends Thread {
+
+	int clientno;
+
+	// InetAddress iadd = InetAddress.getLocalHost();
+//	JFrame jf = new JFrame("scrnshots before sending");
+//	JLabel jleb = new JLabel();
+
+	DatagramSocket socaud;
+
+	//Robot rb = new Robot();
+	// Toolkit tk = Toolkit.getDefaultToolkit();
+
+	// int x = tk.getScreenSize().height;
+	// int y = tk.getScreenSize().width;
+
+	byte[] outbuffaud = new byte[62000];
+
+	BufferedImage mybuf;
+
+//	ImageIcon img;
+//	Rectangle rc;
+
+	//int bord = Canvas_Demo.panel.getY() - Canvas_Demo.frame.getY();
+	// Rectangle rc = new Rectangle(new
+	// Point(Canvas_Demo.frame.getX(),Canvas_Demo.frame.getY()),new
+	// Dimension(Canvas_Demo.frame.getWidth(),Canvas_Demo.frame.getHeight()));
+
+	// Rectangle rv = new Rectangle(d);
+	public Audthread(DatagramSocket dsaud) throws Exception {
+		socaud = dsaud;
+		System.out.println(socaud.getPort());
+//		jf.setSize(500, 400);
+//		jf.setLocation(500, 400);
+//		jf.setVisible(true);
+	}
+
+	public void run() {
+		while (true) {
+			try {
+				int num = JavaServer.i;
+				AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+				DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+				TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
+				line.open(format);
+				line.start();
+
+			//	socket = new DatagramSocket();
+
+				System.out.println("Server is sending audio...");
+				while (true) {
+					byte[] data = new byte[1024];
+					int bytesRead = line.read(data, 0, data.length);
+					for (int j = 0; j < num; j++) {
+//						DatagramPacket dp = new DatagramPacket(outbuff, outbuff.length, JavaServer.inet[j],
+//								JavaServer.port[j]);
+						//System.out.println("Frame Sent to: " + JavaServer.inet[j] + " port: " + JavaServer.port[j]
+						//	+ " size: " + baos.toByteArray().length);
+						DatagramPacket packet = new DatagramPacket(data, bytesRead, JavaServer.audinet[j], JavaServer.audport[j]);
+						socaud.send(packet);
+						//socaud.send(dp);
+					//	data.flush();
+					}
+				}
+			} catch (LineUnavailableException | IOException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 	}

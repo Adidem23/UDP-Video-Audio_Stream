@@ -39,18 +39,27 @@ import javax.swing.ScrollPaneConstants;
  */
 public class JavaClient {
     public static DatagramSocket ds;
+    public static DatagramSocket dsaud;
 
     public static void main(String[] args) throws Exception {
         ds = new DatagramSocket();
+        dsaud = new DatagramSocket();
         
         byte[] init = new byte[62000];
         init = "givedata".getBytes();
+
+        byte[] initaud = new byte[62000];
+        initaud = "givedataaud".getBytes();
         
-        InetAddress addr = InetAddress.getByName("");
+        InetAddress addr = InetAddress.getByName("192.168.1.107");
         
         DatagramPacket dp = new DatagramPacket(init,init.length,addr,4321);
         
         ds.send(dp);
+
+        DatagramPacket dpaud = new DatagramPacket(initaud,initaud.length,addr,54321);
+
+        ds.send(dpaud);
         
         DatagramPacket rcv = new DatagramPacket(init, init.length);
         
