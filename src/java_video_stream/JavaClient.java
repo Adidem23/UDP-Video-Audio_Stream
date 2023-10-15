@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Java_Video_Stream;
+package java_video_stream;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -46,7 +46,7 @@ public class JavaClient {
         byte[] init = new byte[62000];
         init = "givedata".getBytes();
         
-        InetAddress addr = InetAddress.getLocalHost();
+        InetAddress addr = InetAddress.getByName("");
         
         DatagramPacket dp = new DatagramPacket(init,init.length,addr,4321);
         
@@ -63,7 +63,7 @@ public class JavaClient {
         
         String modifiedSentence;
 
-        InetAddress inetAddress = InetAddress.getLocalHost();
+        InetAddress inetAddress = InetAddress.getByName("");
         //.getByName(String hostname); "CL11"
         System.out.println(inetAddress);
 

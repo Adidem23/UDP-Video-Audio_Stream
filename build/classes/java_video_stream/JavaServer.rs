@@ -1,7 +1,0 @@
-java_video_stream.Vidthread
-java_video_stream.Sentencefromserver
-java_video_stream.Canvas_Demo$2
-java_video_stream.Canvas_Demo$1
-java_video_stream.SThread
-java_video_stream.JavaServer
-java_video_stream.Canvas_Demo

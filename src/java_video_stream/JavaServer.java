@@ -1,5 +1,6 @@
 package java_video_stream;
 
+import com.github.sarxos.webcam.Webcam;
 import com.sun.jna.Native;
 
 import java.io.BufferedReader;
@@ -37,10 +38,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
-/**
- *
- * @author imran
- */
+import static java_video_stream.JavaServer.getImage;
+
 public class JavaServer {
 
 	/**
@@ -53,10 +52,19 @@ public class JavaServer {
 	static int count = 0;
 	public static BufferedReader[] inFromClient;
 	public static DataOutputStream[] outToClient;
+	static Webcam webcam = Webcam.getDefault();
 	
 	public static void main(String[] args) throws Exception
 	{
+
+		webcam.open();
 		JavaServer jv = new JavaServer();
+	}
+
+	public static BufferedImage getImage()
+	{
+		BufferedImage bm =webcam.getImage();
+		return bm;
 	}
 
 	
@@ -64,7 +72,7 @@ public class JavaServer {
 	public JavaServer() throws Exception {
 		
 		
-		NativeLibrary.addSearchPath("libvlc", "c:\\Program Files (x86)\\VideoLAN\\VLC");
+		NativeLibrary.addSearchPath("libvlc", "C:\\Program Files\\VideoLAN\\VLC");
 
 		JavaServer.inet = new InetAddress[30];
 		port = new int[30];
@@ -86,7 +94,7 @@ public class JavaServer {
 		Canvas_Demo canv = new Canvas_Demo();
 		System.out.println("Gotcha");
 
-		// OutputStream[] os = new OutputStream[5];
+		OutputStream[] os = new OutputStream[5];
 
 		i = 0;
 		
@@ -142,6 +150,7 @@ public class JavaServer {
 class Vidthread extends Thread {
 
 	int clientno;
+
 	// InetAddress iadd = InetAddress.getLocalHost();
 	JFrame jf = new JFrame("scrnshots before sending");
 	JLabel jleb = new JLabel();
@@ -186,7 +195,7 @@ class Vidthread extends Thread {
 
 				// System.out.println("another frame sent ");
 
-				mybuf = rb.createScreenCapture(rc);
+				mybuf =getImage();
 
 				img = new ImageIcon(mybuf);
 
