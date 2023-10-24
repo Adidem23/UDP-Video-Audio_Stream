@@ -13,3 +13,10 @@ For this project to function, you have to have VLC media player installed in it'
 don't forget to change the part of the code where necessary.
 
 In the repo, there are some JAR libs like Java Native Library and VLCJ, you must add them in your project path. 
+
+# Tech Stack : 
+- UDP Protocol
+- Video Stream
+- Audio Stream
+- WireShark
+- Java
